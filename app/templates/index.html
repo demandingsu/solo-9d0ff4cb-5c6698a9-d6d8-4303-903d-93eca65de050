@@ -30,4 +30,25 @@
 {% else %}
 <p>暂无运行。</p>
 {% endif %}
+
+<h2>读段号去重记录</h2>
+{% if jobs %}
+<table>
+  <tr><th>运行号</th><th>样本</th><th>状态</th><th>保留对数</th><th>剔除对数</th><th>发起时间(UTC)</th><th>说明</th><th></th></tr>
+  {% for j in jobs %}
+  <tr>
+    <td>{{ j.run_number }}</td>
+    <td>{{ j.sample_id }}</td>
+    <td><span class="badge b-{{ j.status }}">{{ labels[j.status] }}</span></td>
+    <td>{{ j.kept_pairs if j.kept_pairs is not none else "—" }}</td>
+    <td>{{ j.dropped_pairs if j.dropped_pairs is not none else "—" }}</td>
+    <td>{{ j.created_at }}</td>
+    <td class="err">{{ j.error or "" }}</td>
+    <td><a href="/dedup/{{ j.id }}">查看</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>暂无去重记录。去重入口在已发布运行的样本行里。</p>
+{% endif %}
 {% endblock %}

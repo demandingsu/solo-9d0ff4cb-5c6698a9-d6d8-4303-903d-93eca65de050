@@ -26,6 +26,27 @@ CREATE TABLE IF NOT EXISTS sample_counts (
   corrected  INTEGER NOT NULL DEFAULT 0,   -- 其中经单碱基纠错的对数
   PRIMARY KEY (run_id, sample_id)
 );
+CREATE TABLE IF NOT EXISTS dedup_jobs (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  run_id         INTEGER NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+  sample_id      TEXT NOT NULL,
+  status         TEXT NOT NULL CHECK (status IN ('processing', 'published', 'failed')),
+  error          TEXT,
+  staging_dir    TEXT NOT NULL,
+  source_r1      TEXT NOT NULL,            -- 发布区里的源文件绝对路径
+  source_r2      TEXT NOT NULL,
+  source_r1_name TEXT NOT NULL,
+  source_r2_name TEXT NOT NULL,
+  expected_pairs INTEGER NOT NULL,         -- 原入库对数
+  input_pairs    INTEGER,
+  kept_pairs     INTEGER,
+  dropped_pairs  INTEGER,
+  created_at     TEXT NOT NULL,
+  updated_at     TEXT NOT NULL,
+  published_at   TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS dedup_jobs_one_per_sample
+  ON dedup_jobs(run_id, sample_id);
 """
 
 

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block head %}
+{% if job.status == "processing" %}<meta http-equiv="refresh" content="3">{% endif %}
+{% endblock %}
+{% block content %}
+<h2>读段号去重:{{ run.run_number }} / {{ job.sample_id }}</h2>
+<p>状态:<span class="badge b-{{ job.status }}">{{ labels[job.status] }}</span><br>
+源文件:{{ job.source_r1_name }} + {{ job.source_r2_name }}<br>
+发起时间(UTC):{{ job.created_at }}
+{% if job.published_at %}<br>发布时间(UTC):{{ job.published_at }}{% endif %}</p>
+
+{% if job.status == "failed" %}
+<p class="err">失败原因:{{ job.error }}</p>
+<p>本次未发布任何文件或计数;源文件保持不变。可在运行页重新发起去重。</p>
+<p><a href="/runs/{{ run.id }}">返回运行 {{ run.run_number }}</a></p>
+{% elif job.status == "processing" %}
+<p>正在逐对去重,页面每 3 秒自动刷新……</p>
+{% endif %}
+
+{% if job.status == "published" %}
+<table>
+  <tr><th>原入库对数</th><th>输入对数</th><th>保留对数</th><th>剔除对数</th></tr>
+  <tr>
+    <td>{{ job.expected_pairs }}</td>
+    <td>{{ job.input_pairs }}</td>
+    <td>{{ job.kept_pairs }}</td>
+    <td>{{ job.dropped_pairs }}</td>
+  </tr>
+</table>
+<table>
+  <tr><th>文件</th><th>下载</th></tr>
+  <tr><td>{{ job.sample_id }}_dedup_R1.fastq</td>
+      <td><a href="/dedup/{{ job.id }}/download/{{ job.sample_id }}_dedup_R1.fastq">{{ job.sample_id }}_dedup_R1.fastq</a></td></tr>
+  <tr><td>{{ job.sample_id }}_dedup_R2.fastq</td>
+      <td><a href="/dedup/{{ job.id }}/download/{{ job.sample_id }}_dedup_R2.fastq">{{ job.sample_id }}_dedup_R2.fastq</a></td></tr>
+  <tr><td>dedup.log</td>
+      <td><a href="/dedup/{{ job.id }}/download/dedup.log">dedup.log</a></td></tr>
+</table>
+<p><a href="/runs/{{ run.id }}">返回运行 {{ run.run_number }}</a></p>
+{% endif %}
+{% endblock %}
